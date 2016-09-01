@@ -103,8 +103,8 @@
 <body>
     <strong>Cool Spots in Oakland</strong>
     <br>
-    <select data-bind="options: filters, value: filter">
-    </select>
+<!--    <select data-bind="options: filters, value: filter">-->
+    <input type="text" data-bind="textInput: filter">
     <br>
     <br>
     <ul data-bind="foreach: filteredItems">
@@ -182,12 +182,34 @@
                     self.filter = ko.observable('');
                     self.items = ko.observableArray(data.items);
                     self.filteredItems = ko.computed(function() {
-                        var filter = self.filter();
+                        var filter = self.filter().toLowerCase();
                         if (!filter || filter == "None") {
                             return self.items();
                         } else {
+
+
                             return ko.utils.arrayFilter(self.items(), function(i) {
-                                return i.type == filter;
+                                console.log(i);
+                                //return i.title == filter;
+                                //return true;
+
+                                // If the location title contains the filter term
+                                //if (i.title === filter) {
+                                if (i.title.toLowerCase().indexOf(filter) !== -1) {
+
+                                    // show the map marker
+                                    if (typeof i.marker !== 'undefined') {
+                                        i.marker.setVisible(true);
+                                    }
+
+                                    return true; // show the location in the list
+                                } else {
+                                    // hide the map marker 
+                                    if (typeof i.marker !== 'undefined') {
+                                        i.marker.setVisible(false);
+                                    }
+
+                                }
                             });
                         }
 
@@ -267,10 +289,10 @@
                 var largeInfowindow = new google.maps.InfoWindow();
                 var bounds = new google.maps.LatLngBounds();
                 // The following group uses the location array to create an array of markers on initialize.
-                for (var i = 0; i < locations.length; i++) {
+                for (var i = 0; i < locations.items.length; i++) {
                     // Get the position from the location array.
-                    var position = locations[i].location;
-                    var title = locations[i].title;
+                    var position = locations.items[i].location;
+                    var title = locations.items[i].title;
                     // Create a marker per location, and put into markers array.
                     var marker = new google.maps.Marker({
                         map: map,

@@ -2,6 +2,7 @@
 <html>
 
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         html,
         body {
@@ -110,8 +111,9 @@
     <br>
     <br>
     <ul data-bind="foreach: filteredItems">
-        <li data-bind="text: name"></li>
+        <li data-bind="text: name, click: $root.listClick"></li>
     </ul>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <script src="js/knockout.js"></script>
 
     <div id="map"></div>
@@ -121,6 +123,7 @@
         var markers = [];
         var polygon = null;
         var placeMarkers = [];
+        var fourSquareUrl = 'https://api.foursquare.com/v2/venues/search';
 
         function initMap() {
                 map = new google.maps.Map(document.getElementById('map'), {
@@ -138,7 +141,7 @@
                 };
                 */
 
-//                var fourSquareUrl = 
+                //                var fourSquareUrl = 
 
                 var locations = {
                     filters: ["Sudo Room", "Eli's Mile High Club", "East Bay Rats MC", "Oakland Metro Operahouse", "Lake Merritt"],
@@ -183,12 +186,22 @@
                 var ViewModel = function(data) {
                     var self = this;
                     location.marker = marker;
+
+                    self.listClick = function(loc) {
+                        console.log(loc);
+                    }
+
                     self.filters = ko.observableArray(data.filters);
                     self.filter = ko.observable('');
                     self.items = ko.observableArray(data.items);
                     self.filteredItems = ko.computed(function() {
                         var filter = self.filter().toLowerCase();
                         if (!filter || filter == "None") {
+                            self.items().forEach(function(item) {
+                                if (item.marker) {
+                                    item.marker.setVisible(true);
+                                }
+                            });
                             return self.items();
                         } else {
 
@@ -332,6 +345,24 @@
         function populateInfoWindow(marker, infowindow) {
             // Check to make sure the infowindow is not already opened on this marker.
             if (infowindow.marker != marker) {
+
+                $.ajax({
+                    type: 'GET',
+                    dataType: 'json',
+                    url: fourSquareUrl,
+                    data: {
+                        client_id: 'ZMMEQGBA5QMTRLTFC3PMU2RLC3GCZ1QQTII5KH0ZKW5OOBX0',
+                        client_secret: 'JCF0AU5HJQOF0GDX2RD3E3YGXMNPZUGSWCL3RFJTKFCIYW32',
+                        near: 'San Francisco',
+                        v: '20130815',
+                        query: marker.title
+                    }
+                }).done(function(result) {
+                    console.log(result);
+                    getStreetViewFunction(result);
+                }).fail(function(error) {
+                    getStreetViewFunction(error);
+                });
                 // Clear the infowindow content to give the streetview time to load.
                 infowindow.setContent('');
                 infowindow.marker = marker;
@@ -339,17 +370,19 @@
                 infowindow.addListener('closeclick', function() {
                     infowindow.marker = null;
                 });
-                var streetViewService = new google.maps.StreetViewService();
-                var radius = 50;
-                // In case the status is OK, which means the pano was found, compute the
-                // position of the streetview image, then calculate the heading, then get a
-                // panorama from that and set the options
-                function getStreetView(data, status) {
+
+                function getStreetViewFunction(fsData) {
+                    var streetViewService = new google.maps.StreetViewService();
+                    var radius = 50;
+                        // In case the status is OK, which means the pano was found, compute the
+                        // position of the streetview image, then calculate the heading, then get a
+                        // panorama from that and set the options
+                    function getStreetView(data, status) {
                         if (status == google.maps.StreetViewStatus.OK) {
                             var nearStreetViewLocation = data.location.latLng;
                             var heading = google.maps.geometry.spherical.computeHeading(
                                 nearStreetViewLocation, marker.position);
-                            infowindow.setContent('<div>' + marker.title + '</div><div id="pano"></div>');
+                                infowindow.setContent('<div>' + marker.title + '</div><div id="pano"></div><div>') + fsData.response.venues[0].location.address + '</div>');
                             var panoramaOptions = {
                                 position: nearStreetViewLocation,
                                 pov: {
@@ -371,34 +404,34 @@
                 infowindow.open(map, marker);
             }
 
+        }
+
+        // This function will loop through the listings and hide all but the one 
+        // currently selected in the dropdown menu.
 
 
-            // This function will loop through the listings and hide all but the one 
-            // currently selected in the dropdown menu.
+        /*
+              function toggleBounce() {
+                if (marker.getAnimation() !== null) {
+                  marker.setAnimation(null);
+                } else {
+                  marker.setAnimation(google.maps.Animation.BOUNCE);
+                }
+              }
+              document.getElementById('bounce-markers').addEventListener('click', toggleBounce);
+        */
+
+        /*
+
+                    marker.addEventListener('click', (function(marker) {
+                        return function() {
+                            octopus.setCurrentCat(catCopy);
+                            catView.render();
+                        };
+                    })(cat));
 
 
-            /*
-                  function toggleBounce() {
-                    if (marker.getAnimation() !== null) {
-                      marker.setAnimation(null);
-                    } else {
-                      marker.setAnimation(google.maps.Animation.BOUNCE);
-                    }
-                  }
-                  document.getElementById('bounce-markers').addEventListener('click', toggleBounce);
-            */
-
-            /*
-
-                        marker.addEventListener('click', (function(marker) {
-                            return function() {
-                                octopus.setCurrentCat(catCopy);
-                                catView.render();
-                            };
-                        })(cat));
-
-
-            */
+        */
 
 
 
