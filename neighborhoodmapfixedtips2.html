@@ -307,7 +307,7 @@
 
 
                             $.ajax({
-                                    tips: {
+                                    data: {
                                         client_id: clientID,
                                         client_secret: clientSecret,
                                         near: 'San Francisco',
@@ -315,15 +315,18 @@
                                         v: '20130815',
                                         query: marker.title,
                                         limit: 10
-                                    },
+                                    }.done(function(response) {
                                     // Supposed to iterate through each of the markers.  Supposed to.
+
+                                    console.log("tips", response);
                                     for (var i = 0; i < locations.items.length; i++) {
                                         infoWindow.setContent();
                                         var url = 'https://api.foursquare.com/v2/venues/VENUE_ID/tips'
                                         infoWindow.append(url);
-                                    }).done(function(response) {
-                                    console.log("tips", response);
+                                    }
                                 })
+
+
 
                             }).fail(function(error) {
                             getStreetViewFunction(error);
@@ -373,7 +376,7 @@
                             infowindow.open(map, marker);
                         }
 
-                    }
+                    })
 
 
 
@@ -385,6 +388,7 @@
 
 
                 }
+            }
     </script>
 
     <script async defer src="https://maps.googleapis.com/maps/api/js?libraries=geometry&key=AIzaSyAFOLdihpWd9JBI3n5KcXK7dXGdGIjHFcY&v=3&callback=initMap">
