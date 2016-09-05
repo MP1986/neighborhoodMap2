@@ -123,6 +123,7 @@
         var markers = [];
         var polygon = null;
         var placeMarkers = [];
+
         function initMap() {
                 map = new google.maps.Map(document.getElementById('map'), {
                     center: {
@@ -131,6 +132,7 @@
                     },
                     zoom: 13
                 });
+
                 var locations = {
                     filters: ["Sudo Room", "Eli's Mile High Club", "East Bay Rats MC", "Oakland Metro Operahouse", "Lake Merritt"],
                     items: [{
@@ -140,6 +142,7 @@
                             lat: 37.835000,
                             lng: -122.264186
                         },
+
                     }, {
                         name: "Eli's Mile High Club",
                         title: "Eli's Mile High Club",
@@ -173,6 +176,7 @@
                 var ViewModel = function(data) {
                     var self = this;
                     location.marker = marker;
+
                     self.listClick = function(loc) {
                         console.log(loc);
                     }
@@ -189,34 +193,50 @@
                             });
                             return self.items();
                         } else {
+
+
                             return ko.utils.arrayFilter(self.items(), function(i) {
                                 console.log(i);
                                 //return i.title == filter;
                                 //return true;
+
                                 // If the location title contains the filter term
                                 //if (i.title === filter) {
                                 if (i.title.toLowerCase().indexOf(filter) !== -1) {
+
                                     // show the map marker
                                     if (typeof i.marker !== 'undefined') {
                                         i.marker.setVisible(true);
                                     }
+
                                     return true; // show the location in the list
                                 } else {
                                     // hide the map marker 
                                     if (typeof i.marker !== 'undefined') {
                                         i.marker.setVisible(false);
                                     }
+
                                 }
                             });
                         }
+
+
                     });
+
+
+
+
                     function hideListings() {
                         for (var i = 0; i < markers.length; i++) {
                             markers[i].setMap(null);
                         }
                     }
+
                 };
+
                 ko.applyBindings(new ViewModel(locations));
+
+
                 var largeInfowindow = new google.maps.InfoWindow();
                 var bounds = new google.maps.LatLngBounds();
                 // The following group uses the location array to create an array of markers on initialize.
@@ -232,18 +252,21 @@
                         animation: google.maps.Animation.DROP,
                         id: i
                     });
+
                     locations.items[i].marker = marker;
                     // Push the marker to our array of markers.
                     markers.push(marker);
                     // Create an onclick event to open an infowindow at each marker.
                     marker.addListener('click', function() {
                         var self = this;
+
                         populateInfoWindow(this, largeInfowindow),
                             this.setAnimation(google.maps.Animation.BOUNCE),
                             setTimeout(function() {
                                 self.setAnimation(null)
                             }, 3500);
                     });
+
                     bounds.extend(markers[i].position);
                 }
                 // Extend the boundaries of the map for each marker
@@ -253,13 +276,17 @@
             // one infowindow which will open at the marker that is clicked, and populate based
             // on that markers position.
         function populateInfoWindow(marker, infowindow) {
+
                 var clientID = 'ZMMEQGBA5QMTRLTFC3PMU2RLC3GCZ1QQTII5KH0ZKW5OOBX0',
                     clientSecret = 'JCF0AU5HJQOF0GDX2RD3E3YGXMNPZUGSWCL3RFJTKFCIYW32',
                     version = '20130815',
                     query = marker.title,
                     base_url = "https://api.foursquare.com/v2/venues/";
+
+
                 // Check to make sure the infowindow is not already opened on this marker.
                 if (infowindow.marker != marker) {
+
                     $.ajax({
                         url: base_url + '/search',
                         dataType: 'json',
@@ -275,17 +302,22 @@
                             console.log("venue: ", result);
                             console.log("venue id: ", result.response.venues[0].id);
                             getStreetViewFunction(result);
+
                             //                    var tipsUrl = 'https://api.foursquare.com/v2/venues/VENUE_ID/tips'
+
+
                             $.ajax({
                                     data: {
                                         client_id: clientID,
                                         client_secret: clientSecret,
                                         near: 'San Francisco',
+
                                         v: '20130815',
                                         query: marker.title,
                                         limit: 10
                                     }.done(function(response) {
                                     // Supposed to iterate through each of the markers.  Supposed to.
+
                                     console.log("tips", response);
                                     for (var i = 0; i < locations.items.length; i++) {
                                         infoWindow.setContent();
@@ -293,6 +325,9 @@
                                         infoWindow.append(url);
                                     }
                                 })
+
+
+
                             }).fail(function(error) {
                             getStreetViewFunction(error);
                         });
@@ -302,6 +337,7 @@
                         infowindow.addListener('closeclick', function() {
                             infowindow.marker = null;
                         });
+
                         function getStreetViewFunction(fsData) {
                             var streetViewService = new google.maps.StreetViewService();
                             var radius = 50;
@@ -339,9 +375,18 @@
                             // Open the infowindow on the correct marker.
                             infowindow.open(map, marker);
                         }
+
                     })
+
+
+
                     // This function will loop through the listings and hide all but the one 
                     // currently selected in the dropdown menu.
+
+
+
+
+
                 }
             }
     </script>
