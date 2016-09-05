@@ -315,7 +315,8 @@
                                         v: '20130815',
                                         query: marker.title,
                                         limit: 10
-                                    }.done(function(response) {
+                                    }
+                                    }).done(function(response) {
                                     // Supposed to iterate through each of the markers.  Supposed to.
 
                                     console.log("tips", response);
@@ -324,7 +325,7 @@
                                         var url = 'https://api.foursquare.com/v2/venues/VENUE_ID/tips'
                                         infoWindow.append(url);
                                     }
-                                })
+                                
 
 
 
